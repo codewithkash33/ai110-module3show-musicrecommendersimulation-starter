@@ -25,14 +25,13 @@ My simplified version prioritizes content-based filtering using available song a
 - **UserProfile features**: favorite_genre, favorite_mood, target_energy, likes_acoustic
 
 **Algorithm Recipe**:
-- +2.0 points for exact genre match
+- +1.0 point for exact genre match
 - +1.0 point for exact mood match
-- Energy similarity score: 1.0 - |user_target_energy - song_energy| (scaled 0-1)
-- Acoustic bonus: +0.5 if user likes acoustic and song_acousticness > 0.7
-- Total score = sum of above
+- Energy similarity score: 2.0 * (1.0 - |user_target_energy - song_energy|)
+- Total score = sum of the weighted components
 - Rank songs by total score descending, recommend top 5
 
-**Potential Biases**: This system might over-prioritize genre matches due to the higher weight (+2.0), potentially ignoring great songs that match the mood or energy but differ in genre. It could also favor high-energy songs if the user's target is high, creating a bias toward intense tracks.
+**Potential Biases**: This system currently places strong emphasis on energy similarity, so high-energy preferences can dominate the ranking. It still uses genre and mood as anchors, which means a small catalog or unbalanced genre distribution can cause the same songs to appear at the top too often.
 
 **Data Flow Visualization**:
 ```
@@ -44,6 +43,29 @@ D --> E[Collect Scores]
 E --> F[Sort Songs by Score Descending]
 F --> G[Select Top K Recommendations]
 G --> H[Output Recommendations]
+```
+
+**Terminal Output Screenshot** (example run after weight shift experiment):
+```
+Loaded songs: 18
+
+=== Profile: High-Energy Pop ===
+Preferences: genre=pop, mood=happy, energy=0.9
+
+Sunrise City - Score: 3.84
+Because: genre match (+1.0), mood match (+1.0), energy similarity (1.84)
+
+Gym Hero - Score: 2.94
+Because: genre match (+1.0), energy similarity (1.94)
+
+Rooftop Lights - Score: 2.72
+Because: mood match (+1.0), energy similarity (1.72)
+
+Storm Runner - Score: 1.98
+Because: energy similarity (1.98)
+
+Electric Dreams - Score: 1.96
+Because: energy similarity (1.96)
 ```
 
 ---
