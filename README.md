@@ -17,17 +17,34 @@ Replace this paragraph with your own summary of what your version does.
 
 ## How The System Works
 
-Explain your design in plain language.
+Real-world music recommendation systems on platforms like Spotify and YouTube employ hybrid approaches combining collaborative filtering, which analyzes patterns from other users' listening behaviors to suggest songs that similar users enjoy, and content-based filtering, which matches songs based on intrinsic attributes like genre, mood, and audio features. Data types include user interactions such as plays, skips, likes, saves to playlists, and time spent listening, alongside song metadata like tempo, energy levels, valence (emotional positivity), and mood tags. At scale, these systems use machine learning models, including deep neural networks, to process vast datasets and provide personalized recommendations.
 
-Some prompts to answer:
+My simplified version prioritizes content-based filtering using available song attributes to match a user's profile, focusing on creating a "vibe" match through genre, mood, energy, and acoustic preferences. This approach simulates how real systems might use audio analysis for initial recommendations before incorporating collaborative data.
 
-- What features does each `Song` use in your system
-  - For example: genre, mood, energy, tempo
-- What information does your `UserProfile` store
-- How does your `Recommender` compute a score for each song
-- How do you choose which songs to recommend
+- **Song features**: genre, mood, energy, tempo_bpm, valence, danceability, acousticness
+- **UserProfile features**: favorite_genre, favorite_mood, target_energy, likes_acoustic
 
-You can include a simple diagram or bullet list if helpful.
+**Algorithm Recipe**:
+- +2.0 points for exact genre match
+- +1.0 point for exact mood match
+- Energy similarity score: 1.0 - |user_target_energy - song_energy| (scaled 0-1)
+- Acoustic bonus: +0.5 if user likes acoustic and song_acousticness > 0.7
+- Total score = sum of above
+- Rank songs by total score descending, recommend top 5
+
+**Potential Biases**: This system might over-prioritize genre matches due to the higher weight (+2.0), potentially ignoring great songs that match the mood or energy but differ in genre. It could also favor high-energy songs if the user's target is high, creating a bias toward intense tracks.
+
+**Data Flow Visualization**:
+```
+graph TD
+A[User Preferences] --> B[Load Songs from CSV]
+B --> C[For Each Song]
+C --> D[Calculate Score: Genre Match (+2), Mood Match (+1), Energy Similarity]
+D --> E[Collect Scores]
+E --> F[Sort Songs by Score Descending]
+F --> G[Select Top K Recommendations]
+G --> H[Output Recommendations]
+```
 
 ---
 
